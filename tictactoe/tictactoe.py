@@ -22,15 +22,20 @@ def player(board):
     """
     Returns player who has the next turn on a board.
     """
-    if not terminal(board):
+    num_X = sum(row.count(X) for row in board)
+    num_O = sum(row.count(O) for row in board)
+
+    if num_X <= num_O:
         return X
+    else:
+        return O
 
 
 def actions(board):
     """
     Returns set of all possible actions (i, j) available on the board.
     """
-    possible_actions = set()
+    possible_actions = []
 
     for i in range(3):
         for j in range(3):
@@ -45,7 +50,7 @@ def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
-    board[action[0]][action[1]] = X
+    board[action[0]][action[1]] = player(board)
 
     return board
 
@@ -102,11 +107,53 @@ def utility(board):
     """
     Returns 1 if X has won the game, -1 if O has won, 0 otherwise.
     """
-    raise NotImplementedError
-
+    only_one_winner = winner(board)
+    if only_one_winner == X:
+        return 1
+    elif only_one_winner == O:
+        return -1
+    else:
+        return 0
 
 def minimax(board):
     """
     Returns the optimal action for the current player on the board.
     """
-    actions(board)
+
+    def max_value(board):
+        if terminal(board):
+            return utility(board)
+        v = -math.inf
+        for action in actions(board):
+            v = max(v, min_value(result(board, action)))
+        return v
+
+    def min_value(board):
+        if terminal(board):
+            return utility(board)
+        v = math.inf
+        for action in actions(board):
+            v = min(v, max_value(result(board, action)))
+        return v
+
+    if terminal(board):
+        return None
+
+    if player(board) == X:
+        best_score = -math.inf
+        best_action = None
+        for action in actions(board):
+            score = min_value(result(board, action))
+            if score > best_score:
+                best_score = score
+                best_action = action
+        return best_action
+    else:
+        best_score = math.inf
+        best_action = None
+        for action in actions(board):
+            score = max_value(result(board, action))
+            if score < best_score:
+                best_score = score
+                best_action = action
+        return best_action
