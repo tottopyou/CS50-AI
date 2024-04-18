@@ -50,9 +50,9 @@ def result(board, action):
     """
     Returns the board that results from making move (i, j) on the board.
     """
-    board[action[0]][action[1]] = player(board)
-
-    return board
+    new_board = [row[:] for row in board]
+    new_board[action[0]][action[1]] = player(board)
+    return new_board
 
 
 
