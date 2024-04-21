@@ -11,10 +11,10 @@ def main():
     if len(sys.argv) != 2:
         sys.exit("Usage: python pagerank.py corpus")
     corpus = crawl(sys.argv[1])
-    #ranks = sample_pagerank(corpus, DAMPING, SAMPLES)
-    #print(f"PageRank Results from Sampling (n = {SAMPLES})")
-    #for page in sorted(ranks):
-    #    print(f"  {page}: {ranks[page]:.4f}")
+    ranks = sample_pagerank(corpus, DAMPING, SAMPLES)
+    print(f"PageRank Results from Sampling (n = {SAMPLES})")
+    for page in sorted(ranks):
+        print(f"  {page}: {ranks[page]:.4f}")
     ranks = iterate_pagerank(corpus, DAMPING)
     print(f"PageRank Results from Iteration")
     for page in sorted(ranks):
@@ -81,7 +81,23 @@ def sample_pagerank(corpus, damping_factor, n):
     their estimated PageRank value (a value between 0 and 1). All
     PageRank values should sum to 1.
     """
-    raise NotImplementedError
+    page_rank = {page: 0 for page in corpus.keys()}
+    total_pages = len(corpus)
+    current_page = random.choice(list(corpus.keys()))
+
+    for _ in range(n):
+        page_rank[current_page] += 1
+        transition_probabilities = [damping_factor * len(corpus[current_page]) / total_pages] * total_pages
+        for i, page in enumerate(corpus):
+            if page in corpus[current_page]:
+                transition_probabilities[i] += (1 - damping_factor) / len(corpus[current_page])
+
+        current_page = random.choices(list(corpus.keys()), weights=transition_probabilities)[0]
+
+    total_visits = sum(page_rank.values())
+    page_rank = {page: pr / total_visits for page, pr in page_rank.items()}
+
+    return page_rank
 
 
 def iterate_pagerank(corpus, damping_factor):
